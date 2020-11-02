@@ -8,9 +8,6 @@ module Danger
       expect(Danger::DangerYajp.new(nil)).to be_a Danger::Plugin
     end
 
-    #
-    # You should test your custom attributes and methods here
-    #
     describe 'with Dangerfile' do
       let(:dangerfile) { testing_dangerfile }
       let(:plugin) { dangerfile.jira }
@@ -20,7 +17,6 @@ module Danger
         ENV['DANGER_JIRA_USER'] = 'username'
         ENV['DANGER_JIRA_PASSWORD'] = 'password'
         DangerYajp.send(:public, *DangerYajp.private_instance_methods)
-        # github = Danger::RequestSources::GitHub.new({}, testing_env)
       end
 
       it 'should return a JIRA::Client instance' do
