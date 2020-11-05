@@ -20,7 +20,7 @@ module Danger
   #     issues.each do |issue|
   #       message "<a href='#{jira.issue_link(issue)}'>#{issue.key} - #{issue.summary}</a>"
   #
-  #       case issue.status
+  #       case issue.status.name
   #       when 'In Progress'
   #         jira.transition_and_update(issue, 10, assignee: { name: 'username' }, customfield_11005: 'example')
   #       when 'To Do', 'Blocked'
@@ -129,8 +129,10 @@ module Danger
       result = true
 
       issues.each do |key|
-        result &= key.save(fields)
+        result &= key.save({ fields: fields })
       end
+
+      return result
     end
 
     # Utility to split the given fields into fields that can be updated on the transition screen corresponding to the `transition_id` of the given `issue`.

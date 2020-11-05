@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    danger-yajp (0.0.1)
+    danger-yajp (0.0.2)
       danger-plugin-api
       jira-ruby
 
@@ -115,19 +115,19 @@ GEM
     rchardet (1.8.0)
     regexp_parser (1.8.2)
     rexml (3.2.4)
-    rspec (3.9.0)
-      rspec-core (~> 3.9.0)
-      rspec-expectations (~> 3.9.0)
-      rspec-mocks (~> 3.9.0)
-    rspec-core (3.9.3)
-      rspec-support (~> 3.9.3)
-    rspec-expectations (3.9.3)
+    rspec (3.10.0)
+      rspec-core (~> 3.10.0)
+      rspec-expectations (~> 3.10.0)
+      rspec-mocks (~> 3.10.0)
+    rspec-core (3.10.0)
+      rspec-support (~> 3.10.0)
+    rspec-expectations (3.10.0)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.9.0)
-    rspec-mocks (3.9.1)
+      rspec-support (~> 3.10.0)
+    rspec-mocks (3.10.0)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.9.0)
-    rspec-support (3.9.4)
+      rspec-support (~> 3.10.0)
+    rspec-support (3.10.0)
     rubocop (1.0.0)
       parallel (~> 1.10)
       parser (>= 2.7.1.5)
@@ -137,7 +137,7 @@ GEM
       rubocop-ast (>= 0.6.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 1.4.0, < 2.0)
-    rubocop-ast (1.1.0)
+    rubocop-ast (1.1.1)
       parser (>= 2.7.1.5)
     ruby-progressbar (1.10.1)
     ruby2_keywords (0.0.2)

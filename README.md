@@ -84,7 +84,7 @@ else
   issues.each do |issue|
     message "<a href='#{jira.issue_link(issue)}'>#{issue.key} - #{issue.summary}</a>"
 
-    case issue.status
+    case issue.status.name
     when 'In Progress'
       jira.transition_and_update(issue, 10, assignee: { name: 'username' }, customfield_11005: 'example')
     when 'To Do', 'Blocked'

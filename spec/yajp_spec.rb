@@ -1,9 +1,15 @@
 # frozen_string_literal: true
 
-require File.expand_path('spec_helper', __dir__)
+require_relative 'spec_helper'
 
 module Danger
   describe Danger::DangerYajp do
+    before do
+      ENV['DANGER_JIRA_URL'] = 'https://jira.company.com/jira'
+      ENV['DANGER_JIRA_USER'] = 'username'
+      ENV['DANGER_JIRA_PASSWORD'] = 'password'
+    end
+
     it 'should be a plugin' do
       expect(Danger::DangerYajp.new(nil)).to be_a Danger::Plugin
     end
@@ -13,9 +19,6 @@ module Danger
       let(:plugin) { dangerfile.jira }
 
       before do
-        ENV['DANGER_JIRA_URL'] = 'https://jira.company.com/jira'
-        ENV['DANGER_JIRA_USER'] = 'username'
-        ENV['DANGER_JIRA_PASSWORD'] = 'password'
         DangerYajp.send(:public, *DangerYajp.private_instance_methods)
       end
 
@@ -92,9 +95,26 @@ module Danger
         allow(issue).to receive(:key_value).and_return('WEB-131')
         stub = stub_request(:post, url).
           with(body: expected_json)
-        plugin.transition(issue, 2, assignee: { name: 'username' }, customfield_11005: 'example')
+        result = plugin.transition(issue, 2, assignee: { name: 'username' }, customfield_11005: 'example')
 
         expect(stub).to have_been_requested.once
+        expect(result).to be true
+      end
+
+      it 'can update issues' do
+        expected_json = '{"fields":{"assignee":{"name":"username"},"customfield_11005":"example"}}'
+        uri_template = Addressable::Template.new "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/{issue}"
+        issue1 = plugin.api.Issue.build
+        issue2 = plugin.api.Issue.build
+
+        allow(issue1).to receive(:key_value).and_return('WEB-132')
+        allow(issue2).to receive(:key_value).and_return('WEB-133')
+        stub = stub_request(:put, uri_template).
+          with(body: expected_json)
+        result = plugin.update([issue1, issue2], assignee: { name: 'username' }, customfield_11005: 'example')
+
+        expect(stub).to have_been_requested.twice
+        expect(result).to be true
       end
     end
   end
