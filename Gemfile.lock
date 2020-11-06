@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    danger-yajp (0.0.2)
+    danger-yajp (0.1.0)
       danger-plugin-api
       jira-ruby
 
@@ -128,13 +128,13 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.10.0)
     rspec-support (3.10.0)
-    rubocop (1.0.0)
+    rubocop (1.2.0)
       parallel (~> 1.10)
       parser (>= 2.7.1.5)
       rainbow (>= 2.2.2, < 4.0)
       regexp_parser (>= 1.8)
       rexml
-      rubocop-ast (>= 0.6.0)
+      rubocop-ast (>= 1.0.1)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 1.4.0, < 2.0)
     rubocop-ast (1.1.1)
@@ -152,7 +152,7 @@ GEM
     tzinfo (1.2.7)
       thread_safe (~> 0.1)
     unicode-display_width (1.7.0)
-    webmock (3.9.3)
+    webmock (3.9.4)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
@@ -170,7 +170,7 @@ DEPENDENCIES
   pry
   rake (~> 13.0)
   rspec (~> 3.9)
-  rubocop (~> 1.0.0)
+  rubocop (>= 1.0.0)
   webmock (~> 3.9)
   yard (~> 0.9.11)
 

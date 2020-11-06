@@ -2,6 +2,7 @@
 
 require_relative 'spec_helper'
 
+# rubocop:disable Metrics/ModuleLength
 module Danger
   describe Danger::DangerYajp do
     before do
@@ -72,6 +73,7 @@ module Danger
         expect(issues).to eq(['WEB-128', 'WEB-129'])
       end
 
+      # rubocop:disable Naming/VariableNumber
       it 'can split transition field from other fields' do
         json = File.read("#{File.dirname(__FILE__)}/support/transitions.all.json")
         url = "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/WEB-130/transitions"
@@ -116,6 +118,27 @@ module Danger
         expect(stub).to have_been_requested.twice
         expect(result).to be true
       end
+      # rubocop:enable Naming/VariableNumber
+
+      it 'can add remote link' do
+        pr_title = 'PR Title'
+        pr_json = '{"html_url":"https://github.com/test/pull/1234"}'
+        url = "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/WEB-134/remotelink"
+        json = File.read("#{File.dirname(__FILE__)}/support/remotelink.json")
+        issue = plugin.api.Issue.build
+
+        allow(issue).to receive(:key_value).and_return('WEB-134')
+        allow(dangerfile.github).to receive(:pr_json).and_return(pr_json)
+        allow(dangerfile.github).to receive(:pr_title).and_return(pr_title)
+
+        stub = stub_request(:post, url).
+          with(body: json)
+        result = plugin.pr_as_remotelink(issue, status: true)
+
+        expect(stub).to have_been_requested.once
+        expect(result).to be true
+      end
     end
   end
 end
+# rubocop:enable Metrics/ModuleLength

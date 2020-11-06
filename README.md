@@ -1,6 +1,8 @@
 # Yet Another Jira Plugin
 
-[![License](http://img.shields.io/badge/license-MIT-green.svg?style=flat)](LICENSE)
+[![License](https://img.shields.io/github/license/juliendms/danger-yajp)](LICENSE)
+[![Gem](https://img.shields.io/gem/v/danger-yajp)](https://rubygems.org/gems/danger-yajp)
+[![Dependencies](https://img.shields.io/librariesio/release/rubygems/danger-yajp)](https://libraries.io/rubygems/danger-yajp)
 
 Yet Another Jira Plugin (in short: yajp) is a [Danger](https://danger.systems/ruby/) plugin that provides methods to easily find and manipulate issues from within the Dangerfile. The major difference with the existing Jira plugins is the ability to transition and update issues with the same feeling as manipulating PR data from Danger. This plugin was build in the same mind as Danger, meaning that you will find methods to easily manipulate Jira data, but no predefined warning and/or message.
 
@@ -56,6 +58,14 @@ yajp allows to easily transition and update issues without the hassle of buildin
 The `transition` method only takes fields available in the transition screen. Use the `split_transition_fields` method to separate the fields available in the transition screen, or use the `transition_and_update` method to transition and update issues (and automatically dispatch the fields to the correct action).
 
 > Transition IDs can be found in Jira under Project Workflow > Edit Workflow in Text Mode.
+
+### Reference the PR as a remote link
+
+yajp can reference the PR as a remote link on Jira. It will use the icon of GitLab or Github depending on what you use. The remote link will use the URL of the PR as a `globalId` to not create duplicates. Optionnaly, you can specify the relationship with the issue (default is `relates to`), and the status, either as an object (eg. `{ "resolved": true, "icon": {...} }`) or as a boolean that will set the value of the property `resolved`. By default, no status is sent.
+
+```rb
+jira.pr_as_remotelink(issue, false)
+```
 
 ### Issue URL
 

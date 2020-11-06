@@ -33,7 +33,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'webmock', '~> 3.9'
 
   # Linting code and docs
-  spec.add_development_dependency 'rubocop', '~> 1.0.0'
+  spec.add_development_dependency 'rubocop', '>= 1.0.0'
   spec.add_development_dependency 'yard', '~> 0.9.11'
 
   # Makes testing easy via `bundle exec guard`

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'jira-ruby'
+require 'json'
 
 module Danger
   # Yet Another Jira Plugin (in short: yajp) provides methods to easily find and manipulate issues from within the Dangerfile.
@@ -69,9 +70,9 @@ module Danger
     #   jira.find_issues('KEY', search_title: false, search_branch: true)
     #
     # @param [Array<String>]  key An array of Jira project keys like `['KEY', 'JIRA']`, or a single `String` with a Jira project key
-    # @param [Boolean] search_title Option to search Jira issues from PR title, default `true`
-    # @param [Boolean] search_commits Option to search Jira issues from from commit messages, default `false`
-    # @param [Boolean] search_branch Option to search Jira issues from the name of the PR branch, default `false`
+    # @param [Boolean] search_title Option to search Jira issues from PR title
+    # @param [Boolean] search_commits Option to search Jira issues from from commit messages
+    # @param [Boolean] search_branch Option to search Jira issues from the name of the PR branch
     #
     # @return [Array<JIRA::Issue>] An array containing all the unique issues found in the PR.
     #
@@ -184,8 +185,38 @@ module Danger
     # @param [JIRA::Issue] issue
     #
     # @return [String] the URL of the issue
+    #
     def issue_link(issue)
       "#{ENV['DANGER_JIRA_URL']}/browse/#{issue.key}"
+    end
+
+    # Add a remote link to the PR in the given Jira issues. It uses the link of the PR as the `globalId` of the remote link, thus avoiding to create duplicates each time the PR is updated.
+    #
+    # @param [Array<JIRA::Issue>] issue An array of issues, or a single `JIRA::Issue`
+    # @param [<String>] relation Option to set the relationship of the remote link
+    # @param [<Hash>] status Option to set the status property of the remote link, it can be <Hash> or a <Boolean> that will set the value of the property `resolved`
+    #
+    # @return [Boolean] `true` if all the remote links were added successfully, `false` otherwise.
+    #
+    def pr_as_remotelink(issue, relation: 'relates to', status: nil)
+      issues = issue.kind_of?(Array) ? issue : [] << issue
+      result = true
+
+      remote_link_prop = { object: { url: pr_link, title: vcs_host.pr_title, icon: link_icon } }
+      remote_link_prop[:globalId] = pr_link
+      remote_link_prop[:relationship] = relation
+
+      if status.kind_of?(Hash)
+        remote_link_prop[:object][:status] = status
+      elsif !status.nil?
+        remote_link_prop[:object][:status] = { resolved: status }
+      end
+
+      issues.each do |key|
+        result &= key.remotelink.build.save(remote_link_prop)
+      end
+
+      return result
     end
 
     private
@@ -194,6 +225,26 @@ module Danger
       return gitlab if defined? @dangerfile.gitlab
 
       github
+    end
+
+    def pr_link
+      return @pr_link unless @pr_link.nil?
+
+      pr_hash = JSON.parse(vcs_host.pr_json, symbolize_names: true)
+
+      if defined? @dangerfile.gitlab
+        @pr_link = pr_hash[:web_url]
+      else
+        @pr_link = pr_hash[:html_url]
+      end
+
+      return @pr_link
+    end
+
+    def link_icon
+      return { title: 'Gitlab', url16x16: 'https://gitlab.com/favicon.ico' } if defined? @dangerfile.gitlab
+
+      { title: 'Github', url16x16: 'https://github.com/favicon.ico' }
     end
 
     def build_regexp_from_key(key)
