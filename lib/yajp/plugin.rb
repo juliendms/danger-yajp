@@ -230,12 +230,10 @@ module Danger
     def pr_link
       return @pr_link unless @pr_link.nil?
 
-      pr_hash = JSON.parse(vcs_host.pr_json, symbolize_names: true)
-
       if defined? @dangerfile.gitlab
-        @pr_link = pr_hash[:web_url]
+        @pr_link = vcs_host.pr_json['web_url']
       else
-        @pr_link = pr_hash[:html_url]
+        @pr_link = vcs_host.pr_json['html_url']
       end
 
       return @pr_link

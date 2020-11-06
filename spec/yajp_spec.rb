@@ -122,7 +122,7 @@ module Danger
 
       it 'can add remote link' do
         pr_title = 'PR Title'
-        pr_json = '{"html_url":"https://github.com/test/pull/1234"}'
+        pr_json = { 'html_url' => 'https://github.com/test/pull/1234' }
         url = "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/WEB-134/remotelink"
         json = File.read("#{File.dirname(__FILE__)}/support/remotelink.json")
         issue = plugin.api.Issue.build
