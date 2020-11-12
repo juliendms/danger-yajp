@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'jira-ruby'
-require 'json'
 
 module Danger
   # Yet Another Jira Plugin (in short: yajp) provides methods to easily find and manipulate issues from within the Dangerfile.
@@ -85,7 +84,7 @@ module Danger
       jira_issues.concat(search_branch(regexp)) if search_branch
       jira_issues.concat(search_pr_body(regexp)) if jira_issues.empty?
 
-      jira_issues.uniq.map { |issue_key| @api.Issue.find(issue_key) }
+      jira_issues.uniq(&:downcase).map { |issue_key| @api.Issue.find(issue_key) }
     end
 
     # Transition the given Jira issue(s) using the ID of the transition. Transition IDs can be found in Jira under Project Workflow > Edit Workflow in Text Mode.
@@ -247,7 +246,7 @@ module Danger
 
     def build_regexp_from_key(key)
       keys = key.kind_of?(Array) ? key.join('|') : key
-      return /((?:#{keys})-[0-9]+)/
+      return /((?:#{keys})-[0-9]+)/i
     end
 
     def search_title(regexp)

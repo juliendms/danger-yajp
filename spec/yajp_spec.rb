@@ -47,9 +47,9 @@ module Danger
       end
 
       it 'can find jira issues via branch name' do
-        allow(plugin).to receive_message_chain('github.branch_for_head').and_return('bugfix/WEB-126')
+        allow(plugin).to receive_message_chain('github.branch_for_head').and_return('bugfix/web-126')
         issues = plugin.search_branch(plugin.build_regexp_from_key('WEB'))
-        expect(issues).to eq(['WEB-126'])
+        expect(issues).to eq(['web-126'])
       end
 
       it 'can find jira issues in pr body' do
@@ -62,13 +62,14 @@ module Danger
         issue = Object.new
 
         def issue.find(key)
-          return key
+          # The find method in jira-ruby plugin is not case sensitive, hence the upcase.
+          return key.upcase
         end
 
         allow_any_instance_of(JIRA::Client).to receive(:Issue).and_return(issue)
 
         allow(plugin).to receive_message_chain('github.pr_title').and_return('Fix for WEB-128 and WEB-129')
-        allow(plugin).to receive_message_chain('github.branch_for_head').and_return('bugfix/WEB-128')
+        allow(plugin).to receive_message_chain('github.branch_for_head').and_return('bugfix/web-128')
         issues = plugin.find_issues('WEB', search_branch: true)
         expect(issues).to eq(['WEB-128', 'WEB-129'])
       end

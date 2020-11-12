@@ -18,12 +18,12 @@ gem 'danger-yajp'
 
 ## Usage
 
-You first need to define the environment variables `DANGER_JIRA_URL`, `DANGER_JIRA_USER` and `DANGER_JIRA_PASSWORD` in your CI environment, for example:
+You first need to define the environment variables `DANGER_JIRA_URL`, `DANGER_JIRA_USER` and `DANGER_JIRA_API_TOKEN` in your CI environment, for example:
 
 ```
 DANGER_JIRA_URL: https://jira.company.com/jira
 DANGER_JIRA_USER: username
-DANGER_JIRA_PASSWORD: abcd12345
+DANGER_JIRA_API_TOKEN: abcd12345
 ```
 
 ### Find issues
