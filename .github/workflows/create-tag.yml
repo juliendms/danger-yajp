@@ -1,0 +1,36 @@
+name: Create tag
+
+on:
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    name: Retrieve version + create tag
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Set up Ruby 2.6
+      uses: actions/setup-ruby@v1
+      with:
+        ruby-version: 2.6.x
+
+    - name: Retrieve version
+      run: |
+        version=$(ruby -e 'require "./lib/yajp/gem_version.rb"' -e 'puts Yajp::VERSION')
+        export TAG_NAME=$version
+
+    - name: Create tag
+      uses: actions/github-script@v3
+      with:
+        github-token: ${{ github.token }}
+        script: |
+          var ref_name = process.env.TAG_NAME
+          github.git.createRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: ref_name,
+            sha: context.sha
+          })
