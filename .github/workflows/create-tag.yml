@@ -27,5 +27,5 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag-name: ${{ env.TAG_NAME }}
+        tag_name: ${{ env.TAG_NAME }}
         draft: true
