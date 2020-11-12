@@ -1,4 +1,4 @@
-name: Create tag
+name: Create release
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Retrieve version + create tag
+    name: Retrieve version + create release
     runs-on: ubuntu-latest
     
     steps:
@@ -22,16 +22,10 @@ jobs:
         version=$(ruby -e 'require "./lib/yajp/gem_version.rb"' -e 'puts Yajp::VERSION')
         echo "TAG_NAME=$version" >> $GITHUB_ENV
 
-    - name: Create tag
-      uses: actions/github-script@v3
+    - name: Create release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        github-token: ${{ github.token }}
-        script: |
-          const ref_name = "refs/tags/" + ${process.env.TAG_NAME)
-          console.log(ref_name)
-          github.git.createRef({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: ref_name,
-            sha: context.sha
-          })
+        tag-name: ${{ env.TAG_NAME }}
+        draft: true
