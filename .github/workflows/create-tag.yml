@@ -27,7 +27,7 @@ jobs:
       with:
         github-token: ${{ github.token }}
         script: |
-          const ref_name = process.env.TAG_NAME
+          const ref_name = "refs/tags/" + ${process.env.TAG_NAME)
           console.log(ref_name)
           github.git.createRef({
             owner: context.repo.owner,
