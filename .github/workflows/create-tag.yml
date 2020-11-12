@@ -20,13 +20,15 @@ jobs:
         ruby-version: 2.6.x
 
     - name: Retrieve version
+      id: version
       run: |
         version=$(ruby -e 'require "./lib/yajp/gem_version.rb"' -e 'puts Yajp::VERSION')
         echo "TAG_NAME=$version" >> $GITHUB_ENV
         latest_tag=$(git describe --tags --abbrev=0)
         echo $latest_tag
         changes=$(git log --pretty='format:%h %s' ${latest_tag}..HEAD)
-        echo "RELEASE_DESCRIPTION=$changes" >> $GITHUB_ENV
+        echo $changes
+        echo "::set-output name=description::$changes"
 
     - name: Create release
       uses: actions/create-release@v1
@@ -35,5 +37,5 @@ jobs:
       with:
         tag_name: ${{ env.TAG_NAME }}
         release_name: v${{ env.TAG_NAME }}
-        body: ${{ env.RELEASE_DESCRIPTION }}
+        body: ${{ steps.version.outputs.description }}
         draft: true
