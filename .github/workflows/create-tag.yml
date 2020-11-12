@@ -20,7 +20,7 @@ jobs:
     - name: Retrieve version
       run: |
         version=$(ruby -e 'require "./lib/yajp/gem_version.rb"' -e 'puts Yajp::VERSION')
-        export TAG_NAME=$version
+        echo "TAG_NAME=$version" >> $GITHUB_ENV
 
     - name: Create tag
       uses: actions/github-script@v3
