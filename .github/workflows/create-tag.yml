@@ -2,7 +2,7 @@ name: Create release
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: main
 
 jobs:
   build:
@@ -37,4 +37,3 @@ jobs:
         tag_name: ${{ env.TAG_NAME }}
         release_name: v${{ env.TAG_NAME }}
         body: ${{ env.VERSION_DESCRIPTION }}
-        draft: true
