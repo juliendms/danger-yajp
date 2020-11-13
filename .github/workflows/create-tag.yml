@@ -1,0 +1,39 @@
+name: Create release
+
+on:
+  push:
+    branches: main
+
+jobs:
+  build:
+    name: Retrieve version + create release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+      
+    - name: Set up Ruby 2.6
+      uses: actions/setup-ruby@v1
+      with:
+        ruby-version: 2.6.x
+
+    - name: Retrieve version
+      id: version
+      run: |
+        version=$(ruby -e 'require "./lib/yajp/gem_version.rb"' -e 'puts Yajp::VERSION')
+        echo "TAG_NAME=$version" >> $GITHUB_ENV
+        latest_tag=$(git describe --tags --abbrev=0)
+        echo 'VERSION_DESCRIPTION<<EOF' >> $GITHUB_ENV
+        git log --pretty='format:%h %s' ${latest_tag}..HEAD >> $GITHUB_ENV
+        echo $'\nEOF' >> $GITHUB_ENV
+
+    - name: Create release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.TAG_NAME }}
+        release_name: v${{ env.TAG_NAME }}
+        body: ${{ env.VERSION_DESCRIPTION }}
