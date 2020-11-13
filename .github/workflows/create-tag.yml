@@ -27,7 +27,7 @@ jobs:
         latest_tag=$(git describe --tags --abbrev=0)
         echo 'VERSION_DESCRIPTION<<EOF' >> $GITHUB_ENV
         git log --pretty='format:%h %s' ${latest_tag}..HEAD >> $GITHUB_ENV
-        echo 'EOF' >> $GITHUB_ENV
+        echo $'\nEOF' >> $GITHUB_ENV
 
     - name: Create release
       uses: actions/create-release@v1
