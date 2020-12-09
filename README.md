@@ -4,7 +4,7 @@
 [![Gem](https://img.shields.io/gem/v/danger-yajp)](https://rubygems.org/gems/danger-yajp)
 [![Dependencies](https://img.shields.io/librariesio/release/rubygems/danger-yajp)](https://libraries.io/rubygems/danger-yajp)
 
-Yet Another Jira Plugin (in short: yajp) is a [Danger](https://danger.systems/ruby/) plugin that provides methods to easily find and manipulate issues from within the Dangerfile. The major difference with the existing Jira plugins is the ability to transition and update issues with the same feeling as manipulating PR data from Danger. This plugin was build in the same mind as Danger, meaning that you will find methods to easily manipulate Jira data, but no predefined warning and/or message.
+Yet Another Jira Plugin (in short: yajp) is a [Danger](https://danger.systems/ruby/) plugin that provides methods to easily find and manipulate issues from within the Dangerfile. The major difference with the existing Jira plugins is the ability to transition and update issues with the same feeling as manipulating PR data from Danger. This plugin was build in the same mind as Danger, meaning that you will find methods to easily manipulate Jira data, but no predefined warning and/or message. It also does that by expanding the Issue class from `jira-ruby`.
 
 Inspired by [danger-jira](https://github.com/RestlessThinker/danger-jira), from which I borrowed the issue search, and by [danger-jira_sync](https://github.com/roverdotcom/danger-jira_sync) for their usage of the awesome [jira-ruby](https://github.com/sumoheavy/jira-ruby) gem.
 
@@ -45,17 +45,23 @@ end
 
 ### Transition / update issues
 
-yajp allows to easily transition and update issues without the hassle of building custom json in the Dangerfile. The inputs are:
+yajp allows to easily transition and update issues without the hassle of building custom json in the Dangerfile. The methods are available in the issue object, or to handle multiple issues in the plugin object. The inputs are:
 
-* An issue (from `jira-ruby`) or an array of issues
 * For the transition action, the ID of the transition
-* Any number of fields to be updated in the form: `key: value`
+* When using the methods from the plugin object, the issues to handled, which is by default the issues found when the command `find_issues` was last run.
+* Any number of fields to be updated in a hash: `key: value`
 
+Example 1: transition all the issues found after running `find_issues`:
  ```rb
- jira.transition(my_issue, 10, assignee: { name: 'username' }, customfield_11005: 'example')
+ jira.transition_all(10, assignee: { name: 'username' }, customfield_11005: 'example')
  ```
 
-The `transition` method only takes fields available in the transition screen. Use the `split_transition_fields` method to separate the fields available in the transition screen, or use the `transition_and_update` method to transition and update issues (and automatically dispatch the fields to the correct action).
+Example 2: update a single issue:
+ ```rb
+ issue.update(assignee: { name: 'username' }, customfield_11005: 'example')
+ ```
+
+The `transition` and `transition_all` methods only take fields available in the transition screen. Use the `split_transition_fields` method to separate the fields available in the transition screen, or use the `transition_and_update_all` method to transition and update issues (and automatically dispatch the fields to the correct action).
 
 > Transition IDs can be found in Jira under Project Workflow > Edit Workflow in Text Mode.
 
@@ -69,10 +75,10 @@ jira.pr_as_remotelink(issue, false)
 
 ### Issue URL
 
-Use `issue_link` to retrieve the browse URL of the Jira issue.
+Use `link` to retrieve the browse URL of the Jira issue.
 
 ```rb
-message "<a href='#{jira.issue_link(issue)}'>#{issue.key} - #{issue.summary}</a>"
+message "<a href='#{issue.link}'>#{issue.key} - #{issue.summary}</a>"
 ```
 
 ### API
@@ -92,13 +98,13 @@ if issues.empty?
   warn 'This PR does not contain any Jira issue.'
 else
   issues.each do |issue|
-    message "<a href='#{jira.issue_link(issue)}'>#{issue.key} - #{issue.summary}</a>"
+    message "<a href='#{issue.link}'>#{issue.key} - #{issue.summary}</a>"
 
     case issue.status.name
     when 'In Progress'
-      jira.transition_and_update(issue, 10, assignee: { name: 'username' }, customfield_11005: 'example')
+      jira.transition_and_update_all(10, issue: issue, assignee: { name: 'username' }, customfield_11005: 'example')
     when 'To Do', 'Blocked'
-      warn "Issue <a href='#{jira.issue_link(issue)}'>#{issue.key}</a> is not in Dev status, please make sure the issue you're working on is in the correct status"
+      warn "Issue <a href='#{issue.link}'>#{issue.key}</a> is not in Dev status, please make sure the issue you're working on is in the correct status"
     end
   end
 end
