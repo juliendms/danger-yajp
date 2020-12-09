@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'jira-ruby'
+require_relative 'issue'
 
 module Danger
   # Yet Another Jira Plugin (in short: yajp) provides methods to easily find and manipulate issues from within the Dangerfile.
@@ -22,7 +22,7 @@ module Danger
   #
   #       case issue.status.name
   #       when 'In Progress'
-  #         jira.transition_and_update(issue, 10, assignee: { name: 'username' }, customfield_11005: 'example')
+  #         issue.transition(10, assignee: { name: 'username' }, customfield_11005: 'example')
   #       when 'To Do', 'Blocked'
   #         warn "Issue <a href='#{jira.issue_link(issue)}'>#{issue.key}</a> is not in Dev status, please make sure the issue you're working on is in the correct status"
   #       end
@@ -73,7 +73,7 @@ module Danger
     # @param [Boolean] search_commits Option to search Jira issues from from commit messages
     # @param [Boolean] search_branch Option to search Jira issues from the name of the PR branch
     #
-    # @return [Array<JIRA::Issue>] An array containing all the unique issues found in the PR.
+    # @return [Array<JIRA::Resource::Issue>] An array containing all the unique issues found in the PR.
     #
     def find_issues(key, search_title: true, search_commits: false, search_branch: false)
       regexp = build_regexp_from_key(key)
@@ -84,29 +84,27 @@ module Danger
       jira_issues.concat(search_branch(regexp)) if search_branch
       jira_issues.concat(search_pr_body(regexp)) if jira_issues.empty?
 
-      jira_issues.uniq(&:downcase).map { |issue_key| @api.Issue.find(issue_key) }
+      @issues = jira_issues.uniq(&:downcase).map { |issue_key| @api.Issue.find(issue_key) }
     end
 
     # Transition the given Jira issue(s) using the ID of the transition. Transition IDs can be found in Jira under Project Workflow > Edit Workflow in Text Mode.
     # The fields that can be updated with this method are only the fields available in the transition screen of the transition. Otherwise use `transition_and_update`.
     #
     # @example Transition the issue `my_issue` and set the fields `assignee` and `customfield_11005` available on the transition screens
-    #   jira.transition(my_issue, 10, assignee: { name: 'username' }, customfield_11005: 'example')
+    #   jira.transition_all(my_issue, 10, assignee: { name: 'username' }, customfield_11005: 'example')
     #
-    # @param [Array<JIRA::Issue>] issue An array of issues, or a single `JIRA::Issue`
     # @param [Integer] transition_id
+    # @param [Array<JIRA::Resource::Issue>, JIRA::Resource::Issue] issue An array of issues, or a single issue
     # @param [Hash] fields Fields that can be updated on the transition screen
     #
     # @return [Boolean] `true` if all the issues were transitioned successfully, `false` otherwise.
     #
-    def transition(issue, transition_id, **fields)
+    def transition_all(transition_id, issue: @issues, **fields)
       issues = issue.kind_of?(Array) ? issue : [] << issue
-      data = { transition: { id: transition_id.to_s } }
-      data[:fields] = fields unless fields.empty?
       result = true
 
       issues.each do |key|
-        result &= key.transitions.build.save(data)
+        result &= key.transition(transition_id, **fields)
       end
 
       return result
@@ -115,21 +113,21 @@ module Danger
     # Update the given Jira issue(s).
     #
     # @example Update the issue `my_issue` and set the fields `assignee` and `customfield_11005`
-    #   jira.update(my_issue, assignee: { name: 'username' }, customfield_11005: 'example')
+    #   jira.update_all(my_issue, assignee: { name: 'username' }, customfield_11005: 'example')
     #
-    # @param [Array<JIRA::Issue>] issue An array of issue, or a single `JIRA::Issue`
+    # @param [Array<JIRA::Resource::Issue>, JIRA::Resource::Issue] issue An array of issue, or a single issue
     # @param [Hash] fields Fields to update
     #
     # @return [Boolean] `true` if all the issues were updated successfully, `false` otherwise.
     #
-    def update(issue, **fields)
+    def update_all(issue: @issues, **fields)
       return if fields.empty?
 
       issues = issue.kind_of?(Array) ? issue : [] << issue
       result = true
 
       issues.each do |key|
-        result &= key.save({ fields: fields })
+        result &= key.update(**fields)
       end
 
       return result
@@ -137,7 +135,7 @@ module Danger
 
     # Utility to split the given fields into fields that can be updated on the transition screen corresponding to the `transition_id` of the given `issue`.
     #
-    # @param [JIRA::Issue] issue
+    # @param [JIRA::Resource::Issue] issue
     # @param [Integer] transition_id
     # @param [Hash] fields Fields to split
     #
@@ -161,37 +159,51 @@ module Danger
     # and use the other fields with the update action.
     #
     # @example Transition the issue `my_issue` and set the fields `assignee` and `customfield_11005`
-    #   jira.transition_and_update(my_issue, 10, assignee: { name: 'username' }, customfield_11005: 'example')
+    #   jira.transition_and_update_all(my_issue, 10, assignee: { name: 'username' }, customfield_11005: 'example')
     #
-    # @param [Array<JIRA::Issue>] issue An array of issues, or a single `JIRA::Issue`
     # @param [Integer] transition_id
+    # @param [Array<JIRA::Resource::Issue>, JIRA::Resource::Issue] issue An array of issues, or a single issue
     # @param [Hash] fields Fields to update
     #
     # @return [Boolean] `true` if all the issues were transitioned and updated successfully, `false` otherwise.
     #
-    def transition_and_update(issue, transition_id, **fields)
+    def transition_and_update_all(transition_id, issue: @issues, **fields)
       issues = issue.kind_of?(Array) ? issue : [] << issue
       result = issues.first.split_transition_fields(transition_id, fields)
       transition_fields = result[:transition_fields]
       fields = result[:other_fields]
 
-      result = transition(issues, transition_id, **transition_fields)
-      result & update(issues, **fields)
+      result = transition(transition_id, issue: issues, **transition_fields)
+      result & update(issue: issues, **fields)
     end
 
-    # Get the browse URL of a Jira issue.
-    #
-    # @param [JIRA::Issue] issue
-    #
-    # @return [String] the URL of the issue
-    #
+    # @deprecated Please use the new #{transition_and_update_all} method
+    def transition_and_update(issue, transition_id, **fields)
+      Warning.warn('Deprecated use of the transition_and_update method, please use the new method definition')
+      transition_and_update_all(transition_id, issue: issue, **fields)
+    end
+
+    # @deprecated Please use the new #{update_all} method
+    def update(issue, **fields)
+      Warning.warn('Deprecated use of the update method, please use the new method definition')
+      update_all(issue: issue, **fields)
+    end
+
+    # @deprecated Please use the new #{transition_all} method
+    def transition(issue, transition_id, **fields)
+      Warning.warn('Deprecated use of the transition method, please use the new method definition')
+      transition_all(transition_id, issue: issue, **fields)
+    end
+
+    # @deprecated Please use the method available on the issue directly [#JIRA::Resource::Issue.issue_link]
     def issue_link(issue)
+      Warning.warn('Deprecated use of the issue_link method, please use the same method available in the Issue class')
       "#{ENV['DANGER_JIRA_URL']}/browse/#{issue.key}"
     end
 
     # Add a remote link to the PR in the given Jira issues. It uses the link of the PR as the `globalId` of the remote link, thus avoiding to create duplicates each time the PR is updated.
     #
-    # @param [Array<JIRA::Issue>] issue An array of issues, or a single `JIRA::Issue`
+    # @param [Array<JIRA::Resource::Issue>, JIRA::Resource::Issue] issue An array of issues, or a single issue
     # @param [<String>] relation Option to set the relationship of the remote link
     # @param [<Hash>] status Option to set the status property of the remote link, it can be <Hash> or a <Boolean> that will set the value of the property `resolved`
     #
