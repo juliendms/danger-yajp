@@ -10,7 +10,7 @@ module Danger
     #
     # @return [String] the URL of the issue
     #
-    def issue_link
+    def link
       "#{ENV['DANGER_JIRA_URL']}/browse/#{key}"
     end
 

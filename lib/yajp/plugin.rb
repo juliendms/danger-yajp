@@ -18,13 +18,13 @@ module Danger
   #     warn 'This PR does not contain any Jira issue.'
   #   else
   #     issues.each do |issue|
-  #       message "<a href='#{jira.issue_link(issue)}'>#{issue.key} - #{issue.summary}</a>"
+  #       message "<a href='#{issue.link}'>#{issue.key} - #{issue.summary}</a>"
   #
   #       case issue.status.name
   #       when 'In Progress'
   #         issue.transition(10, assignee: { name: 'username' }, customfield_11005: 'example')
   #       when 'To Do', 'Blocked'
-  #         warn "Issue <a href='#{jira.issue_link(issue)}'>#{issue.key}</a> is not in Dev status, please make sure the issue you're working on is in the correct status"
+  #         warn "Issue <a href='#{issue.link}'>#{issue.key}</a> is not in Dev status, please make sure the issue you're working on is in the correct status"
   #       end
   #     end
   #   end
@@ -195,7 +195,7 @@ module Danger
       transition_all(transition_id, issue: issue, **fields)
     end
 
-    # @deprecated Please use the method available on the issue directly [#JIRA::Resource::Issue.issue_link]
+    # @deprecated Please use the method available on the issue directly [#JIRA::Resource::Issue.link]
     def issue_link(issue)
       Warning.warn('Deprecated use of the issue_link method, please use the same method available in the Issue class')
       "#{ENV['DANGER_JIRA_URL']}/browse/#{issue.key}"
@@ -205,7 +205,7 @@ module Danger
     #
     # @param [Array<JIRA::Resource::Issue>, JIRA::Resource::Issue] issue An array of issues, or a single issue
     # @param [<String>] relation Option to set the relationship of the remote link
-    # @param [<Hash>] status Option to set the status property of the remote link, it can be <Hash> or a <Boolean> that will set the value of the property `resolved`
+    # @param [<Hash>, <Boolean>] status Option to set the status property of the remote link, it can be <Hash> or a <Boolean> that will set the value of the property `resolved`
     #
     # @return [Boolean] `true` if all the remote links were added successfully, `false` otherwise.
     #
