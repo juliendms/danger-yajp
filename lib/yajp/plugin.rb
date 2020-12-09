@@ -177,30 +177,6 @@ module Danger
       result & update(issue: issues, **fields)
     end
 
-    # @deprecated Please use the new #{transition_and_update_all} method
-    def transition_and_update(issue, transition_id, **fields)
-      Warning.warn('Deprecated use of the transition_and_update method, please use the new method definition')
-      transition_and_update_all(transition_id, issue: issue, **fields)
-    end
-
-    # @deprecated Please use the new #{update_all} method
-    def update(issue, **fields)
-      Warning.warn('Deprecated use of the update method, please use the new method definition')
-      update_all(issue: issue, **fields)
-    end
-
-    # @deprecated Please use the new #{transition_all} method
-    def transition(issue, transition_id, **fields)
-      Warning.warn('Deprecated use of the transition method, please use the new method definition')
-      transition_all(transition_id, issue: issue, **fields)
-    end
-
-    # @deprecated Please use the method available on the issue directly [#JIRA::Resource::Issue.link]
-    def issue_link(issue)
-      Warning.warn('Deprecated use of the issue_link method, please use the same method available in the Issue class')
-      "#{ENV['DANGER_JIRA_URL']}/browse/#{issue.key}"
-    end
-
     # Add a remote link to the PR in the given Jira issues. It uses the link of the PR as the `globalId` of the remote link, thus avoiding to create duplicates each time the PR is updated.
     #
     # @param [Array<JIRA::Resource::Issue>, JIRA::Resource::Issue] issue An array of issues, or a single issue
