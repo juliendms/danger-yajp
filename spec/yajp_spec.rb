@@ -92,13 +92,13 @@ module Danger
 
       it 'can transition an issue' do
         expected_json = '{"transition":{"id":"2"},"fields":{"assignee":{"name":"username"},"customfield_11005":"example"}}'
-        url = "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/WEB-131/transitions"
-        issue = plugin.api.Issue.build
+        issue_id = Random.rand(1000)
+        url = "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/#{issue_id}/transitions"
+        issue = plugin.api.Issue.build({ 'id' => issue_id, 'key' => 'WEB-131' })
 
-        allow(issue).to receive(:key_value).and_return('WEB-131')
         stub = stub_request(:post, url).
           with(body: expected_json)
-        result = plugin.transition(issue, 2, assignee: { name: 'username' }, customfield_11005: 'example')
+        result = plugin.transition_all(2, issue: issue, assignee: { name: 'username' }, customfield_11005: 'example')
 
         expect(stub).to have_been_requested.once
         expect(result).to be true
@@ -107,14 +107,12 @@ module Danger
       it 'can update issues' do
         expected_json = '{"fields":{"assignee":{"name":"username"},"customfield_11005":"example"}}'
         uri_template = Addressable::Template.new "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/{issue}"
-        issue1 = plugin.api.Issue.build
-        issue2 = plugin.api.Issue.build
+        issue1 = plugin.api.Issue.build({ 'id' => Random.rand(1000), 'self' => "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/WEB-132", 'key' => 'WEB-132' })
+        issue2 = plugin.api.Issue.build({ 'id' => Random.rand(1000), 'self' => "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/WEB-133", 'key' => 'WEB-133' })
 
-        allow(issue1).to receive(:key_value).and_return('WEB-132')
-        allow(issue2).to receive(:key_value).and_return('WEB-133')
         stub = stub_request(:put, uri_template).
           with(body: expected_json)
-        result = plugin.update([issue1, issue2], assignee: { name: 'username' }, customfield_11005: 'example')
+        result = plugin.update_all(issue: [issue1, issue2], assignee: { name: 'username' }, customfield_11005: 'example')
 
         expect(stub).to have_been_requested.twice
         expect(result).to be true
