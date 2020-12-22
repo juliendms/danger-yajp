@@ -87,13 +87,14 @@ module Danger
       @issues = jira_issues.uniq(&:downcase).map { |issue_key| @api.Issue.find(issue_key) }
     end
 
-    # Transition the given Jira issue(s) using the ID of the transition. Transition IDs can be found in Jira under Project Workflow > Edit Workflow in Text Mode.
+    # Transition the given Jira issue(s) using the ID or name of the transition. Transition IDs can be found in Jira under Project Workflow > Edit Workflow in Text Mode.
+    # The transition name is the text that appears on the issue screen to transition it.
     # The fields that can be updated with this method are only the fields available in the transition screen of the transition. Otherwise use `transition_and_update`.
     #
-    # @example Transition the issue `my_issue` and set the fields `assignee` and `customfield_11005` available on the transition screens
-    #   jira.transition_all(my_issue, 10, assignee: { name: 'username' }, customfield_11005: 'example')
+    # @example Transition the issue `my_issue` using the transition 'done' and set the fields `assignee` and `customfield_11005` available on the transition screens
+    #   jira.transition_all(my_issue, 'done', assignee: { name: 'username' }, customfield_11005: 'example')
     #
-    # @param [Integer] transition_id
+    # @param [Integer, String] transition_id ID or name of the transition
     # @param [Array<JIRA::Resource::Issue>, JIRA::Resource::Issue] issue An array of issues, or a single issue
     # @param [Hash] fields Fields that can be updated on the transition screen
     #
