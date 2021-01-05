@@ -29,12 +29,12 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '~> 13.0'
 
   # Testing support
-  spec.add_development_dependency 'rspec', '~> 3.9'
-  spec.add_development_dependency 'webmock', '~> 3.9'
+  spec.add_development_dependency 'rspec', '~> 3'
+  spec.add_development_dependency 'webmock', '~> 3'
 
   # Linting code and docs
-  spec.add_development_dependency 'rubocop', '>= 1.0.0'
-  spec.add_development_dependency 'yard', '~> 0.9.11'
+  spec.add_development_dependency 'rubocop', '~> 1'
+  spec.add_development_dependency 'yard', '~> 0.9'
 
   # Makes testing easy via `bundle exec guard`
   spec.add_development_dependency 'guard', '~> 2.16'

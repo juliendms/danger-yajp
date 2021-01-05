@@ -87,13 +87,14 @@ module Danger
       @issues = jira_issues.uniq(&:downcase).map { |issue_key| @api.Issue.find(issue_key) }
     end
 
-    # Transition the given Jira issue(s) using the ID of the transition. Transition IDs can be found in Jira under Project Workflow > Edit Workflow in Text Mode.
+    # Transition the given Jira issue(s) using the ID or name of the transition. Transition IDs can be found in Jira under Project Workflow > Edit Workflow in Text Mode.
+    # The transition name is the text that appears on the issue screen to transition it.
     # The fields that can be updated with this method are only the fields available in the transition screen of the transition. Otherwise use `transition_and_update`.
     #
-    # @example Transition the issue `my_issue` and set the fields `assignee` and `customfield_11005` available on the transition screens
-    #   jira.transition_all(my_issue, 10, assignee: { name: 'username' }, customfield_11005: 'example')
+    # @example Transition the issue `my_issue` using the transition 'done' and set the fields `assignee` and `customfield_11005` available on the transition screens
+    #   jira.transition_all(my_issue, 'done', assignee: { name: 'username' }, customfield_11005: 'example')
     #
-    # @param [Integer] transition_id
+    # @param [Integer, String] transition_id ID or name of the transition
     # @param [Array<JIRA::Resource::Issue>, JIRA::Resource::Issue] issue An array of issues, or a single issue
     # @param [Hash] fields Fields that can be updated on the transition screen
     #
@@ -175,30 +176,6 @@ module Danger
 
       result = transition(transition_id, issue: issues, **transition_fields)
       result & update(issue: issues, **fields)
-    end
-
-    # @deprecated Please use the new #{transition_and_update_all} method
-    def transition_and_update(issue, transition_id, **fields)
-      Warning.warn('Deprecated use of the transition_and_update method, please use the new method definition')
-      transition_and_update_all(transition_id, issue: issue, **fields)
-    end
-
-    # @deprecated Please use the new #{update_all} method
-    def update(issue, **fields)
-      Warning.warn('Deprecated use of the update method, please use the new method definition')
-      update_all(issue: issue, **fields)
-    end
-
-    # @deprecated Please use the new #{transition_all} method
-    def transition(issue, transition_id, **fields)
-      Warning.warn('Deprecated use of the transition method, please use the new method definition')
-      transition_all(transition_id, issue: issue, **fields)
-    end
-
-    # @deprecated Please use the method available on the issue directly [#JIRA::Resource::Issue.link]
-    def issue_link(issue)
-      Warning.warn('Deprecated use of the issue_link method, please use the same method available in the Issue class')
-      "#{ENV['DANGER_JIRA_URL']}/browse/#{issue.key}"
     end
 
     # Add a remote link to the PR in the given Jira issues. It uses the link of the PR as the `globalId` of the remote link, thus avoiding to create duplicates each time the PR is updated.

@@ -47,13 +47,13 @@ end
 
 yajp allows to easily transition and update issues without the hassle of building custom json in the Dangerfile. The methods are available in the issue object, or to handle multiple issues in the plugin object. The inputs are:
 
-* For the transition action, the ID of the transition
+* For the transition action, the ID or name of the transition (which is not the name of the status)
 * When using the methods from the plugin object, the issues to handled, which is by default the issues found when the command `find_issues` was last run.
 * Any number of fields to be updated in a hash: `key: value`
 
 Example 1: transition all the issues found after running `find_issues`:
  ```rb
- jira.transition_all(10, assignee: { name: 'username' }, customfield_11005: 'example')
+ jira.transition_all('done', assignee: { name: 'username' }, customfield_11005: 'example')
  ```
 
 Example 2: update a single issue:

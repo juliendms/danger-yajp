@@ -95,10 +95,13 @@ module Danger
         issue_id = Random.rand(1000)
         url = "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/#{issue_id}/transitions"
         issue = plugin.api.Issue.build({ 'id' => issue_id, 'key' => 'WEB-131' })
+        transition_1 = issue.transitions.build({ 'id' => '2', 'name' => 'TEST' })
+        transition_2 = issue.transitions.build({ 'id' => '3', 'name' => 'FAKE' })
 
+        allow_any_instance_of(JIRA::HasManyProxy).to receive(:all).and_return([transition_1, transition_2])
         stub = stub_request(:post, url).
           with(body: expected_json)
-        result = plugin.transition_all(2, issue: issue, assignee: { name: 'username' }, customfield_11005: 'example')
+        result = plugin.transition_all('test', issue: issue, assignee: { name: 'username' }, customfield_11005: 'example')
 
         expect(stub).to have_been_requested.once
         expect(result).to be true
