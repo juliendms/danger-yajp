@@ -84,7 +84,7 @@ module Danger
         allow_any_instance_of(JIRA::Base).to receive(:self).and_return(url)
         stub = stub_request(:get, "#{url}/transitions?expand=transitions.fields").
           to_return(body: json)
-        result = plugin.split_transition_fields(plugin.api.Issue.build, 2, transition_data.merge(fields))
+        result = plugin.split_transition_fields(plugin.api.Issue.build, 2, **transition_data.merge(fields))
 
         expect(stub).to have_been_requested.once
         expect(result).to eq({ transition_fields: transition_data, other_fields: fields })
