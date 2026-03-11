@@ -68,3 +68,9 @@ yarn-debug.log*
 
 # Ignore docs file
 .yardoc
+
+# Ignore bundler binstubs
+/bin
+
+# Claude config
+/.claude

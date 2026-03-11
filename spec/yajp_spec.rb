@@ -11,8 +11,8 @@ module Danger
       ENV['DANGER_JIRA_PASSWORD'] = 'password'
     end
 
-    it 'should be a plugin' do
-      expect(Danger::DangerYajp.new(nil)).to be_a Danger::Plugin
+    it 'is a plugin' do
+      expect(described_class.new(nil)).to be_a Danger::Plugin
     end
 
     describe 'with Dangerfile' do
@@ -20,10 +20,10 @@ module Danger
       let(:plugin) { dangerfile.jira }
 
       before do
-        DangerYajp.send(:public, *DangerYajp.private_instance_methods)
+        described_class.send(:public, *described_class.private_instance_methods)
       end
 
-      it 'should return a JIRA::Client instance' do
+      it 'returns a JIRA::Client instance' do
         expect(plugin.api).to be_a(JIRA::Client)
       end
 
@@ -77,14 +77,14 @@ module Danger
       # rubocop:disable Naming/VariableNumber
       it 'can split transition field from other fields' do
         json = File.read("#{File.dirname(__FILE__)}/support/transitions.all.json")
-        url = "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/WEB-130/transitions"
+        url = "#{ENV.fetch('DANGER_JIRA_URL', nil)}/rest/api/2/issue/WEB-130/transitions"
         transition_data = { assignee: { name: 'username' }, summary: 'new_summary' }
         fields = { colour: 'red', customfield_11005: 'example' }
 
         allow_any_instance_of(JIRA::Base).to receive(:self).and_return(url)
         stub = stub_request(:get, "#{url}/transitions?expand=transitions.fields").
           to_return(body: json)
-        result = plugin.split_transition_fields(plugin.api.Issue.build, 2, **transition_data.merge(fields))
+        result = plugin.split_transition_fields(plugin.api.Issue.build, 2, **transition_data, **fields)
 
         expect(stub).to have_been_requested.once
         expect(result).to eq({ transition_fields: transition_data, other_fields: fields })
@@ -93,7 +93,7 @@ module Danger
       it 'can transition an issue' do
         expected_json = '{"transition":{"id":"2"},"fields":{"assignee":{"name":"username"},"customfield_11005":"example"}}'
         issue_id = Random.rand(1000)
-        url = "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/#{issue_id}/transitions"
+        url = "#{ENV.fetch('DANGER_JIRA_URL', nil)}/rest/api/2/issue/#{issue_id}/transitions"
         issue = plugin.api.Issue.build({ 'id' => issue_id, 'key' => 'WEB-131' })
         transition_1 = issue.transitions.build({ 'id' => '2', 'name' => 'TEST' })
         transition_2 = issue.transitions.build({ 'id' => '3', 'name' => 'FAKE' })
@@ -109,9 +109,9 @@ module Danger
 
       it 'can update issues' do
         expected_json = '{"fields":{"assignee":{"name":"username"},"customfield_11005":"example"}}'
-        uri_template = Addressable::Template.new "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/{issue}"
-        issue1 = plugin.api.Issue.build({ 'id' => Random.rand(1000), 'self' => "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/WEB-132", 'key' => 'WEB-132' })
-        issue2 = plugin.api.Issue.build({ 'id' => Random.rand(1000), 'self' => "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/WEB-133", 'key' => 'WEB-133' })
+        uri_template = Addressable::Template.new "#{ENV.fetch('DANGER_JIRA_URL', nil)}/rest/api/2/issue/{issue}"
+        issue1 = plugin.api.Issue.build({ 'id' => Random.rand(1000), 'self' => "#{ENV.fetch('DANGER_JIRA_URL', nil)}/rest/api/2/issue/WEB-132", 'key' => 'WEB-132' })
+        issue2 = plugin.api.Issue.build({ 'id' => Random.rand(1000), 'self' => "#{ENV.fetch('DANGER_JIRA_URL', nil)}/rest/api/2/issue/WEB-133", 'key' => 'WEB-133' })
 
         stub = stub_request(:put, uri_template).
           with(body: expected_json)
@@ -125,13 +125,12 @@ module Danger
       it 'can add remote link' do
         pr_title = 'PR Title'
         pr_json = { 'html_url' => 'https://github.com/test/pull/1234' }
-        url = "#{ENV['DANGER_JIRA_URL']}/rest/api/2/issue/WEB-134/remotelink"
+        url = "#{ENV.fetch('DANGER_JIRA_URL', nil)}/rest/api/2/issue/WEB-134/remotelink"
         json = File.read("#{File.dirname(__FILE__)}/support/remotelink.json")
         issue = plugin.api.Issue.build
 
         allow(issue).to receive(:key_value).and_return('WEB-134')
-        allow(dangerfile.github).to receive(:pr_json).and_return(pr_json)
-        allow(dangerfile.github).to receive(:pr_title).and_return(pr_title)
+        allow(dangerfile.github).to receive_messages(pr_json: pr_json, pr_title: pr_title)
 
         stub = stub_request(:post, url).
           with(body: json)
