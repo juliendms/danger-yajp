@@ -11,7 +11,7 @@ module Danger
     # @return [String] the URL of the issue
     #
     def link
-      "#{ENV['DANGER_JIRA_URL']}/browse/#{key}"
+      "#{ENV.fetch('DANGER_JIRA_URL', nil)}/browse/#{key}"
     end
 
     # Update the issue.

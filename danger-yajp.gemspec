@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-lib = File.expand_path('lib', __dir__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'yajp/gem_version'
+require_relative 'lib/yajp/gem_version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'danger-yajp'
@@ -14,12 +12,16 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/juliendms/danger-yajp'
   spec.license       = 'MIT'
 
-  spec.files         = `git ls-files`.split($/)
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
+  spec.metadata = {
+    'homepage_uri'          => spec.homepage,
+    'source_code_uri'       => spec.homepage,
+    'rubygems_mfa_required' => 'true'
+  }
+
+  spec.files         = `git ls-files`.split("\n")
   spec.require_paths = ['lib']
 
-  spec.required_ruby_version = '>= 2.6.0'
+  spec.required_ruby_version = '>= 3.0.0'
 
   spec.add_runtime_dependency 'danger-plugin-api'
   spec.add_runtime_dependency 'jira-ruby'
@@ -34,6 +36,8 @@ Gem::Specification.new do |spec|
 
   # Linting code and docs
   spec.add_development_dependency 'rubocop', '~> 1'
+  spec.add_development_dependency 'rubocop-rake', '~> 0'
+  spec.add_development_dependency 'rubocop-rspec', '~> 3'
   spec.add_development_dependency 'yard', '~> 0.9'
 
   # Makes testing easy via `bundle exec guard`

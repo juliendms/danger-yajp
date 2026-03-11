@@ -45,12 +45,12 @@ module Danger
     def initialize(dangerfile)
       throw Error('The environment variable DANGER_JIRA_URL is required') if ENV['DANGER_JIRA_URL'].nil?
 
-      super(dangerfile)
-      url_parser = %r{(?<site>https?://[^/]+)(?<context_path>/.+)}.match(ENV['DANGER_JIRA_URL'])
+      super
+      url_parser = %r{(?<site>https?://[^/]+)(?<context_path>/.+)}.match(ENV.fetch('DANGER_JIRA_URL', nil))
 
       options = {
-        username:       ENV['DANGER_JIRA_USER'],
-        password:       ENV['DANGER_JIRA_API_TOKEN'],
+        username:       ENV.fetch('DANGER_JIRA_USER', nil),
+        password:       ENV.fetch('DANGER_JIRA_API_TOKEN', nil),
         site:           url_parser[:site],
         context_path:   url_parser[:context_path],
         auth_type:      :basic
