@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    danger-yajp (1.0.2)
+    danger-yajp (1.0.3)
       danger-plugin-api
       jira-ruby
 
